@@ -21,21 +21,22 @@ func kill(cmd *exec.Cmd) error {
 	return cmd.Process.Kill()
 }
 
-// Pipe ...
+// Pipe pipes cmd's stdout/stderr to os's.
 func Pipe(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return nil
 }
 
+// A cmdHooks contains Hooks at different command stages.
 type cmdHooks struct {
 	pre, post, exit Hook
 }
 
-// Option ...
+// An Option is a function to change the default Hooks.
 type Option func(*cmdHooks)
 
-// Cmd ...
+// A Cmd is a executable command.
 type Cmd string
 
 // const errors
@@ -43,7 +44,7 @@ var (
 	ErrInvalidCmd = errors.New("invalid command")
 )
 
-// Exec ...
+// Exec executes the cmd with optional command hooks.
 func (c Cmd) Exec(ctx context.Context, options ...Option) error {
 	args := strings.Fields(string(c))
 	if len(args) < 1 {
