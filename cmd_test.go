@@ -18,6 +18,10 @@ func TestCmd(t *testing.T) {
 
 	// cannot recognize pipe `|`
 	t.Log(exe.Cmd("ps -ef | grep go").Exec(context.TODO(), exe.Pre(exe.Pipe)))
+
+	if exe.Cmd("").Exec(context.TODO()) != exe.ErrInvalidCmd {
+		t.Error(err, "should be invalid cmd")
+	}
 }
 
 func TestStd(t *testing.T) {
@@ -39,5 +43,21 @@ func TestStd(t *testing.T) {
 	wd, _ := os.Getwd()
 	if pwd != wd {
 		t.Error(pwd, "!=", wd)
+	}
+}
+
+func TestDummy(t *testing.T) {
+	p := exe.DummyProber{
+		Stdout: []byte("foo"),
+		Stderr: []byte("bar"),
+	}
+	retout, reterr, err := p.Probe(context.TODO(), "any-cmd")
+	if string(retout) != "foo" || string(reterr) != "bar" || err != nil {
+		t.Error("Dummy prober should return the exact outputs")
+	}
+
+	r := exe.DummyRunner{Err: exe.ErrInvalidCmd}
+	if r.Run(context.TODO(), "any-cmd", "logfile") != exe.ErrInvalidCmd {
+		t.Error("Dummy runner should return the exact error")
 	}
 }
