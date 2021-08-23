@@ -9,7 +9,8 @@ import (
 	"errors"
 	"os"
 	"os/exec"
-	"strings"
+
+	"github.com/google/shlex"
 )
 
 // A Hook provides access to the underlying Cmd.
@@ -46,7 +47,10 @@ var (
 
 // Exec executes the cmd with optional command hooks.
 func (c Cmd) Exec(ctx context.Context, options ...Option) error {
-	args := strings.Fields(string(c))
+	args, err := shlex.Split(string(c))
+	if err != nil {
+		return err
+	}
 	if len(args) < 1 {
 		return ErrInvalidCmd
 	}
