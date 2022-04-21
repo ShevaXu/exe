@@ -9,6 +9,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/google/shlex"
 )
@@ -22,11 +23,39 @@ func kill(cmd *exec.Cmd) error {
 	return cmd.Process.Kill()
 }
 
+// KillGroup kill the child process and all its children.
+// Ref: https://medium.com/@felixge/killing-a-child-process-and-all-of-its-children-in-go-54079af94773
+func KillGroup(cmd *exec.Cmd) error {
+	return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+}
+
 // Pipe pipes cmd's stdout/stderr to os's.
 func Pipe(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return nil
+}
+
+// Setpgid sets the process group ID of the child to Pgid.
+// Pair with KillGroup to perform killing all descendent processes.
+func Setpgid(cmd *exec.Cmd) error {
+	if cmd.SysProcAttr == nil {
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+	}
+	cmd.SysProcAttr.Setpgid = true
+	return nil
+}
+
+// Chain chains a set of Hooks as a Hook.
+func Chain(hooks ...Hook) Hook {
+	return func(cmd *exec.Cmd) error {
+		for _, h := range hooks {
+			if err := h(cmd); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }
 
 // A cmdHooks contains Hooks at different command stages.
