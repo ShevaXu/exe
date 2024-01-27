@@ -2,7 +2,6 @@ package exe_test
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -25,7 +24,7 @@ func TestCmd(t *testing.T) {
 }
 
 func TestStd(t *testing.T) {
-	logF, err := ioutil.TempFile("", "log")
+	logF, err := os.CreateTemp("", "log")
 	if err != nil {
 		t.Fatal(err)
 	}
