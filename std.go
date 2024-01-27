@@ -54,10 +54,8 @@ func (s *std) Probe(ctx context.Context, cmd string) (stdout, stderr []byte, err
 		return nil
 	}))
 
-	if err == nil {
-		stdout = o.Bytes()
-		stderr = e.Bytes()
-	}
+	stdout = o.Bytes()
+	stderr = e.Bytes()
 
 	return
 }

@@ -45,6 +45,24 @@ func TestStd(t *testing.T) {
 	}
 }
 
+func TestStdErr(t *testing.T) {
+	_, _, err := exe.Std.Probe(context.TODO(), "pwd2")
+	if err == nil {
+		t.Fatal("should have error on pwd2")
+	}
+	t.Log(err)
+
+	_, stderr, err := exe.Std.Probe(context.TODO(), "pwd -c")
+	if err == nil {
+		t.Fatal("should have error on pwd -c")
+	}
+	if len(stderr) <= 0 {
+		t.Fatal("should have stderr")
+	}
+	t.Log(err)
+	t.Log(string(stderr))
+}
+
 func TestDummy(t *testing.T) {
 	p := exe.DummyProber{
 		Stdout: []byte("foo"),
